@@ -104,3 +104,7 @@ build
 
 # TernJS port file
 .tern-port
+
+# vs-Code
+.vscode
+

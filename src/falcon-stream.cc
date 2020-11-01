@@ -1,36 +1,26 @@
 #include "falcon-stream.h"
+#include <inttypes.h>
 
 
 Napi::Value keygen(const Napi::CallbackInfo& info) {
 
-    union {
-        uint8_t b[FALCON_TMPSIZE_KEYGEN(10)];
-        uint64_t dummy_u64;
-        fpr dummy_fpr;
-    } tmp;
-    //unsigned char *tmp[FALCON_TMPSIZE_KEYGEN(10)];  
-
-    void *pri[FALCON_PRIVKEY_SIZE(10)];
-    void *pub[FALCON_PUBKEY_SIZE(10)];
-
-    
+    uint8_t tmp[FALCON_TMPSIZE_KEYGEN(10)]; 
 
     Napi::Env env = info.Env();
 
-    u_int64_t * s = info[0].As<Napi::Buffer<u_int64_t>>().Data();
+    shake256_context * s = (shake256_context*) * info[0].As<Napi::Buffer<uint64_t>>().Data();
 
-    shake256_context *c = (shake256_context*) * s;
+    //shake256_context * c = (shake256_context*) * s;
 
-      Napi::Buffer<uint8_t> pk = info[1].As<Napi::Buffer<uint8_t>>();
+    Napi::Buffer<uint8_t> pk = info[1].As<Napi::Buffer<uint8_t>>();
 
-     Napi::Buffer<uint8_t> sk = info[2].As<Napi::Buffer<uint8_t>>();
+    Napi::Buffer<uint8_t> sk = info[2].As<Napi::Buffer<uint8_t>>();
 
     //shake256_init_prng_from_system(&c);
 
-    signed int i = falcon_keygen_make(c, 10, sk.Data() , FALCON_PRIVKEY_SIZE(10), pk.Data(), FALCON_PUBKEY_SIZE(10), &tmp.b, FALCON_TMPSIZE_KEYGEN(10));
-    
-     //uint8_t * p = (uint8_t*) pri;
-    //sk = (Napi::Buffer<u_int8_t*>) p;
+    //size_t tmpL = sizeof(tmp)/sizeof(tmp[0]);
+
+    signed int i = falcon_keygen_make(s, 10, sk.Data() , sk.Length(), pk.Data(), pk.Length(), &tmp, sizeof(tmp));
 
     //for (int i=0; i<100; i++){
     //sk[i] = p[i];
@@ -38,26 +28,26 @@ Napi::Value keygen(const Napi::CallbackInfo& info) {
     //}
     //printf("\n");
 
-
-
      return Napi::Value::From(env,i);
 
 }
-/*
-Napi::Value adsorb(const Napi::CallbackInfo& info) {
+
+Napi::Value startSign(const Napi::CallbackInfo& info) {
 
   Napi::Env env = info.Env();
 
-  //  Napi::Buffer<shake256incctx> s = info[0].As<Napi::Buffer<shake256incctx>();
+  shake256_context * s = (shake256_context *) * info[0].As<Napi::Buffer<uint64_t>>().Data();
 
-    Napi::Buffer<uint8_t> in = info[1].As<Napi::Buffer<uint8_t>>();
+  void * n = info[1].As<Napi::Buffer<uint8_t>>().Data();
 
-  //  shake256_inc_absorb(s.Data(), in.Data(), in.Length());
+  shake256_context * m = (shake256_context *)  * info[2].As<Napi::Buffer<uint64_t>>().Data();
 
-    return Napi::Number::New(info.Env(), 0);
+  int i = falcon_sign_start(s,n,m);
+
+  return Napi::Number::New(info.Env(), i);
 
 }
-
+/*
 Napi::Value finalize(const Napi::CallbackInfo& info) {
 
   Napi::Env env = info.Env();
@@ -116,6 +106,8 @@ Napi::Value syncShake256(const Napi::CallbackInfo& info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "keygen"),
               Napi::Function::New(env, keygen));
+  exports.Set(Napi::String::New(env, "startSign"),
+              Napi::Function::New(env, startSign));
   exports.Set(Napi::String::New(env, "PRIVKEY_SIZE"),
               Napi::Number::New(env, PRIVKEY_SIZE));
   exports.Set(Napi::String::New(env, "PUBKEY_SIZE"),
