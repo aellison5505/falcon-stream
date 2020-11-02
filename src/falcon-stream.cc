@@ -47,67 +47,44 @@ Napi::Value startSign(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), i);
 
 }
-/*
-Napi::Value finalize(const Napi::CallbackInfo& info) {
+
+Napi::Value finalizeSign(const Napi::CallbackInfo& info) {
 
   Napi::Env env = info.Env();
 
-  //  Napi::Buffer<shake256incctx> s = info[0].As<Napi::Buffer<shake256incctx>>();
+  uint8_t tmp[FALCON_TMPSIZE_SIGNDYN(10)]; 
 
-//    shake256_inc_finalize(s.Data());
+  shake256_context * s = (shake256_context *) * info[0].As<Napi::Buffer<uint64_t>>().Data();
 
-    return Napi::Number::New(info.Env(), 0);
+  Napi::Buffer<uint8_t> sig = info[1].As<Napi::Buffer<uint8_t>>();
 
-}
+  size_t * sigL;
+  sigL = info[2].As<Napi::Buffer<size_t>>().Data();
+  *sigL = SIG_MAX;
 
-Napi::Value squeeze(const Napi::CallbackInfo& info) {
+  Napi::Buffer<uint8_t> sk = info[3].As<Napi::Buffer<uint8_t>>();
 
-  Napi::Env env = info.Env();
+  shake256_context * m = (shake256_context *)  * info[4].As<Napi::Buffer<uint64_t>>().Data();
 
-  //  Napi::Buffer<shake256incctx> s = info[1].As<Napi::Buffer<shake256incctx>>();
+  void * n = info[5].As<Napi::Buffer<uint8_t>>().Data();
 
-    Napi::Buffer<uint8_t> out = info[0].As<Napi::Buffer<uint8_t>>();
+  falcon_sign_dyn_finish(s,sig.Data(), sigL, FALCON_SIG_COMPRESSED, sk.Data(), sk.Length(), m, n, &tmp, sizeof(tmp));
 
- //   shake256_inc_squeeze(out.Data(), out.Length(), s.Data());
+  //printf('%ul',  sigL*);
 
-    return Napi::Number::New(info.Env(), 0);
 
-}
+  return Napi::Number::New(info.Env(), 0);
 
-Napi::Value releaseState(const Napi::CallbackInfo& info) {
-
-  Napi::Env env = info.Env();
-
-  //  Napi::Buffer<shake256incctx> s = info[0].As<Napi::Buffer<shake256incctx>>();
-
-//    shake256_inc_ctx_release(s.Data());
-
-    return Napi::Number::New(info.Env(), 0);
 
 }
 
-Napi::Value syncShake256(const Napi::CallbackInfo& info) {
-
-  Napi::Env env = info.Env();
-
-    
-    Napi::Buffer<uint8_t> out = info[0].As<Napi::Buffer<uint8_t>>();
-
-    
-    Napi::Buffer<uint8_t> in = info[1].As<Napi::Buffer<uint8_t>>();
-
-  //  shake256(out.Data(), out.Length(), in.Data(), in.Length());
-
-    return Napi::Number::New(info.Env(), 0);
-
-}
-
-*/
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "keygen"),
               Napi::Function::New(env, keygen));
   exports.Set(Napi::String::New(env, "startSign"),
               Napi::Function::New(env, startSign));
+  exports.Set(Napi::String::New(env, "finalizeSign"),
+              Napi::Function::New(env, finalizeSign));
   exports.Set(Napi::String::New(env, "PRIVKEY_SIZE"),
               Napi::Number::New(env, PRIVKEY_SIZE));
   exports.Set(Napi::String::New(env, "PUBKEY_SIZE"),
@@ -115,18 +92,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "SIG_MAX"),
               Napi::Number::New(env, SIG_MAX));
   
-              /*
-  exports.Set(Napi::String::New(env, "adsorb"),
-              Napi::Function::New(env, adsorb));
-  exports.Set(Napi::String::New(env, "finalize"),
-              Napi::Function::New(env, finalize));
-  exports.Set(Napi::String::New(env, "squeeze"),
-              Napi::Function::New(env, squeeze));
-  exports.Set(Napi::String::New(env, "releaseState"),
-              Napi::Function::New(env, releaseState));
-  exports.Set(Napi::String::New(env, "syncShake256"),
-              Napi::Function::New(env, syncShake256));
-              */
   return exports;
 }
 

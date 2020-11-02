@@ -16,18 +16,20 @@ extern "C" {
 
 #define DEGREE 10
 
-// typedef uint64_t fpr;
-
 Napi::Value keygen(const Napi::CallbackInfo& info);
 
-Napi::Object Init(Napi::Env env, Napi::Object exports);
-
 Napi::Value startSign(const Napi::CallbackInfo& info);
+
+Napi::Value finalizeSign(const Napi::CallbackInfo& info);
+
+Napi::Object Init(Napi::Env env, Napi::Object exports);
 
 unsigned int PRIVKEY_SIZE = FALCON_PRIVKEY_SIZE(10);
 
 unsigned int PUBKEY_SIZE = FALCON_PUBKEY_SIZE(10);
 
 unsigned int SIG_MAX = FALCON_SIG_COMPRESSED_MAXSIZE(10);
+
+
 
 #endif
