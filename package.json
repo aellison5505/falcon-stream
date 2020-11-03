@@ -1,6 +1,6 @@
 {
   "name": "falcon-stream",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Post quantum Falcon-1024 signature stream.",
   "main": "lib/index.js",
   "scripts": {
