@@ -33,6 +33,10 @@ export function startSign(rngShake256: Buffer, nonce: Buffer, msgShake256: Buffe
  */
 export function finalizeSign(rngShake256: Buffer, signature: Buffer, sigLength: Buffer, privateKey: Buffer, msgShake256: Buffer, nonce: Buffer): number;
 
+export function startVerify( msgShake256: Buffer, signature: Buffer): number
+
+export function finalizeVerify(signature: Buffer, publicKey: Buffer, msgShake256: Buffer): number;
+
 export const PRIVKEY_SIZE:number
 
 export const PUBKEY_SIZE: number

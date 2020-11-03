@@ -22,6 +22,10 @@ Napi::Value startSign(const Napi::CallbackInfo& info);
 
 Napi::Value finalizeSign(const Napi::CallbackInfo& info);
 
+Napi::Value startVerify(const Napi::CallbackInfo& info);
+
+Napi::Value finalizeVerify(const Napi::CallbackInfo& info);
+
 Napi::Object Init(Napi::Env env, Napi::Object exports);
 
 unsigned int PRIVKEY_SIZE = FALCON_PRIVKEY_SIZE(10);

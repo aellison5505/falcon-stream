@@ -1,5 +1,5 @@
 export { PRIVKEY_SIZE, SIG_MAX, PUBKEY_SIZE } from '../lib/node-falcon-stream';
-import { keygen, startSign, finalizeSign } from '../lib/node-falcon-stream';
+import { keygen, startSign, finalizeSign, startVerify, finalizeVerify } from '../lib/node-falcon-stream';
 import { initState, adsorb, finalize } from 'sha3-shake256';
 import { randomFillSync } from 'crypto';
 
@@ -39,11 +39,6 @@ export let initSign = (shakeMsg: Buffer, nonce: Buffer) => {
     return i;
 }
 
-export let signPush = (shakeMsg: Buffer, data: Buffer) => {
-    let i = adsorb(shakeMsg, data);
-    return i;
-}
-
 export let signFinish = (signature: Buffer, signatureLength: Buffer, privateKey: Buffer, msgShake: Buffer, nonce: Buffer ) => {
     let shakeCon = Buffer.alloc(8,0);
     let rndShake = rndShake256(shakeCon);
@@ -53,6 +48,25 @@ export let signFinish = (signature: Buffer, signatureLength: Buffer, privateKey:
     return i;
 
 }
+
+export let initVerify = (msgShake: Buffer, signature: Buffer) => {
+    initState(msgShake);
+    let i = startVerify(msgShake, signature);
+    return i;
+}
+
+export let verifyFinish = (signature: Buffer, publicKey: Buffer, msgShake: Buffer)=> {
+    let i = finalizeVerify(signature, publicKey, msgShake);
+    return i;
+}
+
+export let msgPush = (shakeMsg: Buffer, data: Buffer) => {
+    let i = adsorb(shakeMsg, data);
+    return i;
+}
+
+
+
 
 
 

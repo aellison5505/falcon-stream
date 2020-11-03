@@ -1,6 +1,7 @@
-const { createKeys, initSign, signPush, signFinish, nonceSize, shakeBufSize ,PRIVKEY_SIZE, PUBKEY_SIZE, SIG_MAX, sigLen } = require('../lib/index');
+const { createKeys, initSign, msgPush, signFinish, initVerify, verifyFinish, nonceSize, shakeBufSize ,PRIVKEY_SIZE, PUBKEY_SIZE, SIG_MAX, sigLen } = require('../lib/index');
 const expect = require('chai').expect;
 const { endianness } = require('os');
+const { startVerify } = require('../lib/node-falcon-stream');
 
 describe('Falcon Stream Signature', () => {
     
@@ -9,6 +10,7 @@ describe('Falcon Stream Signature', () => {
         this.pubKey = Buffer.alloc(PUBKEY_SIZE, 0);
         this.nonce = Buffer.alloc(nonceSize, 0);
         this.shakeMsg = Buffer.alloc(shakeBufSize, 0);
+        this.shakeMsgVerify = Buffer.alloc(shakeBufSize, 0);
         this.sign = Buffer.alloc(SIG_MAX, 0);
         this.signLen = Buffer.alloc(sigLen, 0);
         this.data1 = "the dog ate the cat. Then killed a bat!";
@@ -33,8 +35,8 @@ describe('Falcon Stream Signature', () => {
     })
     describe('#signPush', () => {
         before(() => {
-            this.i = signPush(this.shakeMsg, Buffer.from(this.data1));
-            this.ii = signPush(this.shakeMsg, Buffer.from(this.data2));
+            this.i = msgPush(this.shakeMsg, Buffer.from(this.data1));
+            this.ii = msgPush(this.shakeMsg, Buffer.from(this.data2));
        
         });
         it('should push data',() => {
@@ -53,4 +55,32 @@ describe('Falcon Stream Signature', () => {
             expect(this.newSign[this.newSign.length-1]).to.be.greaterThan(0);
         });
     })
+    describe('#initVerify', () => {
+        before(() => {
+            this.i = initVerify(this.shakeMsgVerify, this.newSign);
+        });
+        it('should return the msgStart',() => {
+            expect(this.shakeMsg[0]).to.be.greaterThan(0);
+        });
+    });
+    describe('#msgPush', () => {
+        before(() => {
+            this.i = msgPush(this.shakeMsgVerify, Buffer.from(this.data1));
+            this.ii = msgPush(this.shakeMsgVerify, Buffer.from(this.data2));
+       
+        });
+        it('should push data',() => {
+            expect(this.i).to.be.equal(0);
+            expect(this.ii).to.be.equal(0);
+        });
+    });
+    describe('#verifyFinish', () => {
+        before(() => {
+            this.i = verifyFinish(this.newSign, this.pubKey, this.shakeMsgVerify);
+        });
+        it('should return valid',() => {
+            expect(this.i).to.be.equal(0);
+        });
+    })
+    
 })

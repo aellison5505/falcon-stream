@@ -10,15 +10,10 @@ Napi::Value keygen(const Napi::CallbackInfo& info) {
 
     shake256_context * s = (shake256_context*) * info[0].As<Napi::Buffer<uint64_t>>().Data();
 
-    //shake256_context * c = (shake256_context*) * s;
 
     Napi::Buffer<uint8_t> pk = info[1].As<Napi::Buffer<uint8_t>>();
 
     Napi::Buffer<uint8_t> sk = info[2].As<Napi::Buffer<uint8_t>>();
-
-    //shake256_init_prng_from_system(&c);
-
-    //size_t tmpL = sizeof(tmp)/sizeof(tmp[0]);
 
     signed int i = falcon_keygen_make(s, 10, sk.Data() , sk.Length(), pk.Data(), pk.Length(), &tmp, sizeof(tmp));
 
@@ -68,15 +63,44 @@ Napi::Value finalizeSign(const Napi::CallbackInfo& info) {
 
   void * n = info[5].As<Napi::Buffer<uint8_t>>().Data();
 
-  falcon_sign_dyn_finish(s,sig.Data(), sigL, FALCON_SIG_COMPRESSED, sk.Data(), sk.Length(), m, n, &tmp, sizeof(tmp));
+  int i = falcon_sign_dyn_finish(s,sig.Data(), sigL, FALCON_SIG_COMPRESSED, sk.Data(), sk.Length(), m, n, &tmp, sizeof(tmp));
 
-  //printf('%ul',  sigL*);
-
-
-  return Napi::Number::New(info.Env(), 0);
-
+  return Napi::Number::New(info.Env(), i);
 
 }
+
+Napi::Value startVerify(const Napi::CallbackInfo& info) {
+
+  Napi::Env env = info.Env();
+
+  shake256_context * m = (shake256_context *)  * info[0].As<Napi::Buffer<uint64_t>>().Data();
+
+  Napi::Buffer<uint8_t> sig = info[1].As<Napi::Buffer<uint8_t>>();
+
+  int i = falcon_verify_start(m, sig.Data(), sig.Length());
+
+  return Napi::Number::New(info.Env(), i);
+
+}
+
+Napi::Value finalizeVerify(const Napi::CallbackInfo& info) {
+
+  Napi::Env env = info.Env();
+
+  uint8_t tmp[FALCON_TMPSIZE_VERIFY(10)]; 
+
+  Napi::Buffer<uint8_t> sig = info[0].As<Napi::Buffer<uint8_t>>();
+
+  Napi::Buffer<uint8_t> pk = info[1].As<Napi::Buffer<uint8_t>>();
+
+  shake256_context * m = (shake256_context *)  * info[2].As<Napi::Buffer<uint64_t>>().Data();
+
+  int i = falcon_verify_finish(sig.Data(), sig.Length(), FALCON_SIG_COMPRESSED, pk.Data(), pk.Length(), m, &tmp, sizeof(tmp));
+
+  return Napi::Number::New(info.Env(), i);
+
+}
+
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "keygen"),
@@ -85,6 +109,11 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, startSign));
   exports.Set(Napi::String::New(env, "finalizeSign"),
               Napi::Function::New(env, finalizeSign));
+  exports.Set(Napi::String::New(env, "startVerify"),
+              Napi::Function::New(env, startVerify));
+  exports.Set(Napi::String::New(env, "finalizeVerify"),
+              Napi::Function::New(env, finalizeVerify));
+
   exports.Set(Napi::String::New(env, "PRIVKEY_SIZE"),
               Napi::Number::New(env, PRIVKEY_SIZE));
   exports.Set(Napi::String::New(env, "PUBKEY_SIZE"),
