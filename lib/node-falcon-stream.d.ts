@@ -7,7 +7,7 @@
  * @param privateKey Buffer to hold private key
  * @returns 0 on success
  */
-export function keygen(rngShake256: Buffer, publicKey: Buffer, privateKey: Buffer): number
+export declare function keygen(rngShake256: Buffer, publicKey: Buffer, privateKey: Buffer): number
 
 /**
  * Initiates the start of the stream of data to sign. Fills nonce buffer and start the message stream.
@@ -17,7 +17,7 @@ export function keygen(rngShake256: Buffer, publicKey: Buffer, privateKey: Buffe
  * @param msgShake256 Buffer pointer to shake256 message stream.
  * @returns 0 on success
  */
-export function startSign(rngShake256: Buffer, nonce: Buffer, msgShake256: Buffer): number
+export declare function startSign(rngShake256: Buffer, nonce: Buffer, msgShake256: Buffer): number
 
 /**
  * Finishes the data stream, and creates the signature.  Fills the signature buffer,
@@ -31,15 +31,15 @@ export function startSign(rngShake256: Buffer, nonce: Buffer, msgShake256: Buffe
  * @param nonce Buffer of nonce from startSign.
  * @returns 0 on success
  */
-export function finalizeSign(rngShake256: Buffer, signature: Buffer, sigLength: Buffer, privateKey: Buffer, msgShake256: Buffer, nonce: Buffer): number;
+export declare function finalizeSign(rngShake256: Buffer, signature: Buffer, sigLength: Buffer, privateKey: Buffer, msgShake256: Buffer, nonce: Buffer): number;
 
-export function startVerify( msgShake256: Buffer, signature: Buffer): number
+export declare function startVerify( msgShake256: Buffer, signature: Buffer): number
 
-export function finalizeVerify(signature: Buffer, publicKey: Buffer, msgShake256: Buffer): number;
+export declare declare function finalizeVerify(signature: Buffer, publicKey: Buffer, msgShake256: Buffer): number;
 
-export const PRIVKEY_SIZE:number
+export declare const PRIVKEY_SIZE:number
 
-export const PUBKEY_SIZE: number
+export declare const PUBKEY_SIZE: number
 
-export const SIG_MAX: number
+export declare const SIG_MAX: number
 

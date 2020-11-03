@@ -1,7 +1,6 @@
 const { createKeys, initSign, msgPush, signFinish, initVerify, verifyFinish, nonceSize, shakeBufSize ,PRIVKEY_SIZE, PUBKEY_SIZE, SIG_MAX, sigLen } = require('../lib/index');
 const expect = require('chai').expect;
 const { endianness } = require('os');
-const { startVerify } = require('../lib/node-falcon-stream');
 
 describe('Falcon Stream Signature', () => {
     
