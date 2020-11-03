@@ -1,5 +1,5 @@
 export { PRIVKEY_SIZE, SIG_MAX, PUBKEY_SIZE } from '../lib/node-falcon-stream';
-import { keygen, startSign, finalizeSign, SIG_MAX } from '../lib/node-falcon-stream';
+import { keygen, startSign, finalizeSign } from '../lib/node-falcon-stream';
 import { initState, adsorb, finalize } from 'sha3-shake256';
 import { randomFillSync } from 'crypto';
 
