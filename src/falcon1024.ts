@@ -3,13 +3,14 @@ import { keygen, startSign, finalizeSign, startVerify, finalizeVerify } from '..
 import { initState, adsorb, finalize } from 'sha3-shake256';
 import { randomFillSync } from 'crypto';
 
-export const nonceSize = 40;
-export const shakeBufSize = 8;
-export const sigLen = 8;
+export const NONCE_SIZE = 40;
+export const SHAKE_SIZE = 8;
+export const SIG_LENGTH = 8;
+export const RND_SHAKE_SIZE = 48;
 
 let rndShake256 = (shakeCon: Buffer) => {
     
-    let rand = Buffer.alloc(48);
+    let rand = Buffer.alloc(RND_SHAKE_SIZE);
     randomFillSync(rand);
 
     initState(shakeCon);
@@ -17,6 +18,15 @@ let rndShake256 = (shakeCon: Buffer) => {
     finalize(shakeCon);
 
     return shakeCon;
+}
+
+export enum errors {
+    FALCON_ERR_RANDOM = 1,
+    FALCON_ERR_SIZE,
+    FALCON_ERR_FORMAT,
+    FALCON_ERR_BADSIG,
+    FALCON_ERR_BADARG,
+    FALCON_ERR_INTERNAL
 }
 
 export let createKeys = (pubKey: Buffer, privateKey: Buffer) => {

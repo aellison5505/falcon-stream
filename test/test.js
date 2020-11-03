@@ -1,4 +1,4 @@
-const { createKeys, initSign, msgPush, signFinish, initVerify, verifyFinish, nonceSize, shakeBufSize ,PRIVKEY_SIZE, PUBKEY_SIZE, SIG_MAX, sigLen } = require('../lib/index');
+const { createKeys, initSign, msgPush, signFinish, initVerify, verifyFinish,NONCE_SIZE, SHAKE_SIZE ,PRIVKEY_SIZE, PUBKEY_SIZE, SIG_MAX, SIG_LENGTH, FalconStreamSign, FalconStreamVerify } = require('../lib/index');
 const expect = require('chai').expect;
 const { endianness } = require('os');
 
@@ -7,11 +7,11 @@ describe('Falcon Stream Signature', () => {
     before(() => {
         this.priKey = Buffer.alloc(PRIVKEY_SIZE, 0);
         this.pubKey = Buffer.alloc(PUBKEY_SIZE, 0);
-        this.nonce = Buffer.alloc(nonceSize, 0);
-        this.shakeMsg = Buffer.alloc(shakeBufSize, 0);
-        this.shakeMsgVerify = Buffer.alloc(shakeBufSize, 0);
+        this.nonce = Buffer.alloc(NONCE_SIZE, 0);
+        this.shakeMsg = Buffer.alloc(SHAKE_SIZE, 0);
+        this.shakeMsgVerify = Buffer.alloc(SHAKE_SIZE, 0);
         this.sign = Buffer.alloc(SIG_MAX, 0);
-        this.signLen = Buffer.alloc(sigLen, 0);
+        this.signLen = Buffer.alloc(SIG_LENGTH, 0);
         this.data1 = "the dog ate the cat. Then killed a bat!";
         this.data2 =  "The dog then cased the rabbit into the pool!";
     });
@@ -80,6 +80,61 @@ describe('Falcon Stream Signature', () => {
         it('should return valid',() => {
             expect(this.i).to.be.equal(0);
         });
+    });
+    describe('#FalconStream - sign', () => {
+        before(() => {
+            this.falStream = new FalconStreamSign(this.priKey);
+        });
+        it('should return an object',() => {
+            expect(typeof(this.falStream)).to.be.equal('object');
+        });
+    });
+    describe('#FalconStream - stream - sign', () => {
+        before((done) => {
+            this.streamSig = [];
+            this.falStream.on("readable", () =>{
+                let data;
+                while(data = this.falStream.read()) {
+                    this.streamSig.push(data);
+                }
+            });   
+            this.falStream.write(this.data1);
+            this.falStream.write(this.data2);
+            this.falStream.end(() => {
+                done();
+            });
+        });
+        it('should return signature', () => {
+            this.sig = Buffer.concat(this.streamSig);
+            expect(this.sig[this.sig.length-1]).to.be.greaterThan(0);
+        })
     })
-    
+    describe('#FalconStream - verify', () => {
+        before(() => {
+            this.falStreamVer = new FalconStreamVerify(this.pubKey, this.sig);
+        });
+        it('should return an object',() => {
+            expect(typeof(this.falStreamVer)).to.be.equal('object');
+        });
+    });
+    describe('#FalconStream - stream - verify', () => {
+        before((done) => {
+            this.streamVer = [];
+            this.falStreamVer.on("readable", () =>{
+                let data;
+                while(data = this.falStreamVer.read()) {
+                    this.streamVer.push(data);
+                }
+            });   
+            this.falStreamVer.write(this.data1);
+            this.falStreamVer.write(this.data2);
+            this.falStreamVer.end(() => {
+                done();
+            });
+        });
+        it('should return signature valid', () => {
+            this.ver = Buffer.concat(this.streamVer);
+            expect(this.ver[0]).to.be.equal(0);
+        })
+    })
 })
