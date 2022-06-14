@@ -5,21 +5,29 @@ import { initState, adsorb, finalize, releaseState } from 'sha3-shake256';
 import { randomBytes } from 'crypto';
 import { endianness } from 'os';
 
+interface FalconStreamOptions extends TransformOptions {
+    passThrough?: Boolean
+}
+
+
 export class FalconStreamSign extends Transform {
 
     shake256msg: Buffer;
     nonce: Buffer;
+    _signature: Buffer
 
-    constructor(private privateKey: Buffer, options?: TransformOptions) {
+    constructor(private privateKey: Buffer, private options?: FalconStreamOptions) {
         super(options);
         this.shake256msg = Buffer.alloc(SHAKE_SIZE, 0);
         this.nonce = Buffer.alloc(NONCE_SIZE, 0);
+        this._signature = Buffer.alloc(0);
         if(this.privateKey.length !== PRIVKEY_SIZE)
             throw new Error('invalid private key');
         this._init();
     }
 
     _init() {
+        
         initState(this.shake256msg);
         let i = initSign(this.shake256msg, this.nonce);
         if (i !== 0){
@@ -35,6 +43,8 @@ export class FalconStreamSign extends Transform {
         if(encoding !== 'buffer')
             chunk = Buffer.from(chunk);
         this._pushMsg(chunk, callback);
+        if(this.options?.passThrough)
+            this.push(chunk);
     }
 
     _done(callback: TransformCallback) {
@@ -48,6 +58,10 @@ export class FalconStreamSign extends Transform {
         }
     }
 
+    get signature() {
+        return this._signature;
+    }
+
     _final(callback: TransformCallback) {
         let sig = Buffer.alloc(SIG_MAX, 0);
         let sigLength = Buffer.alloc(SIG_LENGTH, 0);
@@ -56,23 +70,14 @@ export class FalconStreamSign extends Transform {
             throw new Error(`${errors[i*-1]}`);
         let b;
         (endianness() === "LE" ? b = Number(sigLength.readBigUInt64LE()) : b = Number(sigLength.readBigUInt64BE()));
-        this.push(sig.slice(0, b));
+        this._signature = sig.slice(0, b);
+        // this.push(this.signature);
         this._done(callback);
     }
 
     private _pushMsg(msgChunk: Buffer, callback: TransformCallback) {
         msgPush(this.shake256msg, msgChunk);
         callback();
-    }
-
-    private _rndShake256(): Buffer {
-        let rndShake = Buffer.alloc(SHAKE_SIZE, 0);
-        let rndBytes = randomBytes(RND_SHAKE_SIZE);
-        initState(rndShake);
-        adsorb(rndShake, rndBytes);
-        finalize(rndShake);
-        return rndShake;
-
     }
 }
 

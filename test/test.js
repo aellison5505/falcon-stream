@@ -13,7 +13,7 @@ describe('Falcon Stream Signature', () => {
         this.sign = Buffer.alloc(SIG_MAX, 0);
         this.signLen = Buffer.alloc(SIG_LENGTH, 0);
         this.data1 = "the dog ate the cat. Then killed a bat!";
-        this.data2 =  "The dog then cased the rabbit into the pool!";
+        this.data2 =  "The dog then chased the rabbit into the pool!";
     });
 
     describe('#createKeys', () => {
@@ -83,7 +83,7 @@ describe('Falcon Stream Signature', () => {
     });
     describe('#FalconStream - sign', () => {
         before(() => {
-            this.falStream = new FalconStreamSign(this.priKey);
+            this.falStream = new FalconStreamSign(this.priKey, { passThrough: true});
         });
         it('should return an object',() => {
             expect(typeof(this.falStream)).to.be.equal('object');
@@ -91,21 +91,23 @@ describe('Falcon Stream Signature', () => {
     });
     describe('#FalconStream - stream - sign', () => {
         before((done) => {
-            this.streamSig = [];
+            this.stream = [];
             this.falStream.on("readable", () =>{
                 let data;
                 while(data = this.falStream.read()) {
-                    this.streamSig.push(data);
+                    this.stream.push(data);
                 }
             });   
             this.falStream.write(this.data1);
             this.falStream.write(this.data2);
             this.falStream.end(() => {
+                this.sig = this.falStream.signature;
                 done();
             });
         });
         it('should return signature', () => {
-            this.sig = Buffer.concat(this.streamSig);
+            this.pass = Buffer.concat(this.stream);
+            console.log(this.pass.toString());
             expect(this.sig[this.sig.length-1]).to.be.greaterThan(0);
         })
     })

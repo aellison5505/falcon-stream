@@ -35,7 +35,7 @@ export declare function finalizeSign(rngShake256: Buffer, signature: Buffer, sig
 
 export declare function startVerify( msgShake256: Buffer, signature: Buffer): number
 
-export declare declare function finalizeVerify(signature: Buffer, publicKey: Buffer, msgShake256: Buffer): number;
+export declare function finalizeVerify(signature: Buffer, publicKey: Buffer, msgShake256: Buffer): number;
 
 export declare const PRIVKEY_SIZE:number
 

@@ -8,11 +8,11 @@
     "build": "tsc",
     "tsc-w": "tsc -w",
     "build-docs": "touch ./readme.md && rm ./readme.md && npx typedoc --toc --mode modules --theme markdown --out /mnt/d/dev/falcon-stream/docs --readme /mnt/d/dev/falcon-stream/readmeHeader/readhead.md /mnt/d/dev/falcon-stream/src && npx concat-md --toc --decrease-title-levels ./docs > README.md",
-    "preinstall": "npm run cmake-clean",
-    "install": "npm run cmake-compile",
-    "postinstall": "npm run test",
-    "cmake-clean": "npx cmake-js clean && node scripts/clean.js",
-    "cmake-compile": "npx cmake-js compile && node scripts/move.js"
+    "preinstall": "yarn run cmake-clean",
+    "install": "yarn run cmake-compile && yarn run build",
+    "postinstall": "yarn run test",
+    "cmake-clean": "yarn cmake-js clean && node scripts/clean.js",
+    "cmake-compile": "yarn cmake-js compile && node scripts/move.js"
   },
   "repository": {
     "type": "git",
@@ -28,11 +28,14 @@
   "author": "Anthony Ellison",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^14.14.6",
+    "@types/node": "~16",
+    "eslint": "^8.17.0",
     "npm-add-script": "^1.1.0",
+    "prettier": "^2.7.0",
+    "stylelint": "^14.9.1",
     "typedoc": "^0.19.2",
     "typedoc-plugin-markdown": "^3.0.11",
-    "typescript": "^4.0.5"
+    "typescript": "^4.7.3"
   },
   "dependencies": {
     "chai": "^4.2.0",
@@ -40,5 +43,6 @@
     "mocha": "^8.2.0",
     "node-addon-api": "^3.0.2",
     "sha3-shake256": "git+https://github.com/aellison5505/node-sha3-shake256.git"
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }
